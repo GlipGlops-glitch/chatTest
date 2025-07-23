@@ -25,9 +25,11 @@ app = FastAPI()
 
 # Allow React dev server and production frontend
 origins = [
-    "http://localhost:3000",  # React dev server
-    # Add any others if needed
+    "http://localhost:3000",  # (Keep for local dev)
+    "https://polite-dune-068d5f11e.2.azurestaticapps.net",  # Your Azure Static Web App URL
 ]
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
