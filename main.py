@@ -4,12 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
+
 
 # --- Config ---
-load_dotenv()
-DB_URL = os.getenv("DATABASE_URL")
-engine = create_engine(DB_URL)
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+engine = create_engine(DATABASE_URL, connect_args={"sslmode": "require"})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -18,6 +18,7 @@ class Message(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50))
     message = Column(Text)
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -31,7 +32,8 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Or restrict to your frontend's URL
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -64,3 +66,8 @@ def post_message(msg: MessageIn):
     session.refresh(m)
     session.close()
     return MessageOut(id=m.id, name=m.name, message=m.message)
+
+@app.get("/")
+def read_root():
+    return {"message": "Backend is running"}
+
